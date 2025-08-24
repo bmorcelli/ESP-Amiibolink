@@ -72,7 +72,7 @@ bool Amiibolink::searchDevice() {
     NimBLEScan* pScan = NimBLEDevice::getScan();
     #ifdef NIMBLE_V2_PLUS
     pScan->setScanCallbacks(new scanCallbacks());
-    BLEScanResults foundDevices = pScan->getResults(5);
+    BLEScanResults foundDevices = pScan->getResults(150);
     bool deviceFound = false;
 
     for (int i=0; i<foundDevices.getCount(); i++) {
@@ -115,7 +115,7 @@ bool Amiibolink::connectToDevice() {
     bool chrFound = false;
 
 #ifdef NIMBLE_V2_PLUS
-    if (!pClient->connect(_device)) return false;
+    if (!pClient->connect(_device, false, false, false)) return false;
 #else
     if (!pClient->connect(&_device, false)) return false;
 #endif
@@ -154,7 +154,7 @@ bool Amiibolink::serviceDiscovery() {
     NimBLEClient *pClient = NimBLEDevice::createClient();
 
 #ifdef NIMBLE_V2_PLUS
-    if (!pClient->connect(_device)) return false;
+    if (!pClient->connect(_device, false, false, false)) return false;
 #else
     if (!pClient->connect(&_device)) return false;
 #endif
