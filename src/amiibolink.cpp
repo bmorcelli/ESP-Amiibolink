@@ -51,6 +51,10 @@ Amiibolink::Amiibolink(bool debug) { _debug = debug;}
 Amiibolink::~Amiibolink() {
     if (_debug) Serial.println("Killing Amiibolink...");
     #ifdef NIMBLE_V2_PLUS
+    if(_device) {
+        delete _device;
+        _device = nullptr;
+    }
     if (NimBLEDevice::isInitialized())
     #else
     if (NimBLEDevice::getInitialized())
@@ -76,7 +80,11 @@ bool Amiibolink::searchDevice() {
 
         if (advertisedDevice->getName() == "amiibolink") {
             deviceFound = true;
-            _device = (NimBLEAdvertisedDevice*)advertisedDevice;
+            if(_device) {
+                delete _device;
+                _device = nullptr;
+            }
+            _device = new NimBLEAdvertisedDevice(*advertisedDevice);
         }
     }
     #else
@@ -106,7 +114,11 @@ bool Amiibolink::connectToDevice() {
     NimBLEClient *pClient = NimBLEDevice::createClient();
     bool chrFound = false;
 
+#ifdef NIMBLE_V2_PLUS
+    if (!pClient->connect(_device)) return false;
+#else
     if (!pClient->connect(&_device, false)) return false;
+#endif
 
     Serial.print("Connected to: ");
     Serial.println(pClient->getPeerAddress().toString().c_str());
@@ -141,7 +153,11 @@ bool Amiibolink::connectToDevice() {
 bool Amiibolink::serviceDiscovery() {
     NimBLEClient *pClient = NimBLEDevice::createClient();
 
+#ifdef NIMBLE_V2_PLUS
+    if (!pClient->connect(_device)) return false;
+#else
     if (!pClient->connect(&_device)) return false;
+#endif
 
     Serial.print("Connected to: ");
     Serial.println(pClient->getPeerAddress().toString().c_str());
